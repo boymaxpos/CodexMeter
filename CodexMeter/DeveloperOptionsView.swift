@@ -6,22 +6,25 @@ struct DeveloperOptionsView: View {
     @ObservedObject var settings: AppSettings
     @ObservedObject var history: UsageHistoryModel
     @ObservedObject var updateChecker: UpdateChecker
+    var embedded = false
     @Environment(\.dismiss) private var dismiss
     @State private var didCopyConfiguration = false
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                Label(L10n.string("developer.title"), systemImage: "hammer")
-                    .font(.headline)
-                Spacer()
-                Button(L10n.string("action.close")) {
-                    dismiss()
+            if !embedded {
+                HStack {
+                    Label(L10n.string("developer.title"), systemImage: "hammer")
+                        .font(.headline)
+                    Spacer()
+                    Button(L10n.string("action.close")) {
+                        dismiss()
+                    }
                 }
-            }
-            .padding(16)
+                .padding(16)
 
-            Divider()
+                Divider()
+            }
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
@@ -37,8 +40,7 @@ struct DeveloperOptionsView: View {
                 .padding(16)
             }
         }
-        .frame(width: 540, height: 680)
-        .background(WindowTitleUpdater(title: L10n.string("developer.title")))
+        .frame(minWidth: 540, maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var updatePreviewGroup: some View {

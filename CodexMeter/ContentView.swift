@@ -666,159 +666,30 @@ private struct ResetCreditsSection: View {
     }
 }
 
-/// Keeps the disclosure animation local so quota rows are not invalidated on every frame.
+/// Opens the shared settings window without expanding the menu bar popover.
 private struct SettingsSection: View {
     @ObservedObject var service: CodexUsageService
     @ObservedObject var settings: AppSettings
     @Environment(\.openWindow) private var openWindow
-    @State private var isExpanded = false
-
-    private let disclosureAnimation = Animation.easeInOut(duration: 0.18)
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Button {
-                withAnimation(disclosureAnimation) {
-                    isExpanded.toggle()
-                }
-            } label: {
-                HStack(spacing: 7) {
-                    Image(systemName: "chevron.right")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
-                        .frame(width: 10)
-                        .rotationEffect(.degrees(isExpanded ? 90 : 0))
-                    Image(systemName: "gearshape")
-                    Text(L10n.string("settings.title"))
-                    Spacer()
-                }
-                .contentShape(Rectangle())
-                .frame(maxWidth: .infinity, minHeight: 32, alignment: .leading)
+        Button {
+            openWindow(id: CodexMeterWindowID.settings)
+            NSApplication.shared.activate(ignoringOtherApps: true)
+        } label: {
+            HStack(spacing: 7) {
+                Image(systemName: "gearshape")
+                Text(L10n.string("settings.title"))
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel(L10n.string("settings.title"))
-            .accessibilityValue(
-                isExpanded
-                    ? L10n.string("accessibility.expanded")
-                    : L10n.string("accessibility.collapsed")
-            )
-
-            if isExpanded {
-                VStack(alignment: .leading, spacing: 12) {
-                    Picker(
-                        L10n.string("settings.language"),
-                        selection: Binding(
-                            get: { settings.language },
-                            set: { language in
-                                settings.language = language
-                                service.refresh()
-                            }
-                        )
-                    ) {
-                        ForEach(AppLanguage.allCases) { language in
-                            Text(language.localizedName).tag(language)
-                        }
-                    }
-
-                    Picker(
-                        L10n.string("settings.appearance"),
-                        selection: $settings.appearanceMode
-                    ) {
-                        ForEach(AppAppearanceMode.allCases) { appearance in
-                            Text(appearance.localizedName).tag(appearance)
-                        }
-                    }
-
-                    Picker(L10n.string("settings.menubar_style"), selection: $settings.menuBarStyle) {
-                        ForEach(MenuBarDisplayStyle.allCases) { style in
-                            Text(style.localizedName).tag(style)
-                        }
-                    }
-
-                    Toggle(
-                        L10n.string("settings.notifications"),
-                        isOn: Binding(
-                            get: { settings.notificationsEnabled },
-                            set: { service.setNotificationsEnabled($0) }
-                        )
-                    )
-
-                    if settings.notificationsEnabled {
-                        Picker(
-                            L10n.string("settings.notification_threshold"),
-                            selection: $settings.notificationThreshold
-                        ) {
-                            ForEach([10, 20, 30, 40], id: \.self) { value in
-                                Text("\(value)%").tag(value)
-                            }
-                        }
-                    }
-
-                    Toggle(
-                        L10n.string("settings.launch_at_login"),
-                        isOn: Binding(
-                            get: { settings.launchAtLoginEnabled },
-                            set: { settings.setLaunchAtLogin($0) }
-                        )
-                    )
-
-                    Button {
-                        openWindow(id: CodexMeterWindowID.popoverCustomization)
-                        NSApplication.shared.activate(ignoringOtherApps: true)
-                    } label: {
-                        HStack {
-                            Label(
-                                L10n.string("settings.popover.title"),
-                                systemImage: "rectangle.topthird.inset.filled"
-                            )
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        .contentShape(Rectangle())
-                        .frame(maxWidth: .infinity, minHeight: 28)
-                    }
-                    .buttonStyle(.plain)
-
-                    Button {
-                        openWindow(id: CodexMeterWindowID.developerOptions)
-                        NSApplication.shared.activate(ignoringOtherApps: true)
-                    } label: {
-                        HStack {
-                            Label(L10n.string("developer.title"), systemImage: "hammer")
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        .contentShape(Rectangle())
-                        .frame(maxWidth: .infinity, minHeight: 28)
-                    }
-                    .buttonStyle(.plain)
-
-                    Button {
-                        openWindow(id: CodexMeterWindowID.about)
-                        NSApplication.shared.activate(ignoringOtherApps: true)
-                    } label: {
-                        HStack {
-                            Label(L10n.string("about.title"), systemImage: "info.circle")
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        .contentShape(Rectangle())
-                        .frame(maxWidth: .infinity, minHeight: 28)
-                    }
-                    .buttonStyle(.plain)
-                }
-                .padding(.top, 10)
-                .padding(.leading, 17)
-                .transition(.move(edge: .top).combined(with: .opacity))
-            }
+            .frame(maxWidth: .infinity, minHeight: 32, alignment: .leading)
+            .contentShape(Rectangle())
         }
-        .clipped()
+        .buttonStyle(.plain)
+        .accessibilityLabel(L10n.string("settings.title"))
     }
 }
 

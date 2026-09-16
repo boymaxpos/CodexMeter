@@ -290,6 +290,28 @@ App Sandbox is currently disabled because CodexMeter must launch the user's
 local Codex executable. This should be reviewed deliberately before any future
 Mac App Store distribution.
 
+## Full history backup and restore
+
+The menu-bar **Settings** entry opens one resizable window with four categories:
+General, Menu Bar & Popover, History & Backup, and Developer, followed by About.
+Existing preferences are preserved. About/update information opens in the same
+settings window; Usage History remains a separate window.
+
+Open **Settings → History & Backup → Backup & Restore** to export a `.codexmeterbackup` file.
+It includes all retained quota and token history across accounts, database
+metadata, and the local identity salt needed to match accounts on another Mac.
+It does not contain login credentials, email addresses, or app preferences.
+Keep this file private. Previously deleted or retention-pruned records cannot
+be recovered. CSV remains a separate readable export format.
+
+Restore replaces all local history after confirmation. CodexMeter validates the
+archive version, SHA-256 checksum, database integrity, schema, and row counts,
+then saves the existing history in `~/Library/Application Support/CodexMeter/Backups`.
+Quit and reopen the app after restoring; history writes pause until then.
+Your existing retention preference applies after reopening. An interrupted
+restore is rolled back before account activation at the next launch.
+Backups larger than 512 MiB are currently unsupported.
+
 ## Known Limitations
 
 - Codex App Server is experimental and may change without notice.

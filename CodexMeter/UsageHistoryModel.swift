@@ -13,6 +13,8 @@ final class UsageHistoryModel: ObservableObject {
     @Published private(set) var errorMessage: String?
     @Published private(set) var dataRevision = 0
     @Published private(set) var activeAccountKey: String?
+    @Published private(set) var isRestoring = false
+    @Published private(set) var needsRestart = false
 
     let databaseURL: URL
     private let store: UsageHistoryStore?
@@ -38,7 +40,7 @@ final class UsageHistoryModel: ObservableObject {
         retention: HistoryRetention,
         accountKey: String
     ) {
-        guard let store else { return }
+        guard let store, !isRestoring, !needsRestart else { return }
         let accountPreparationTask = self.accountPreparationTask
         Task {
             await accountPreparationTask?.value
@@ -66,7 +68,7 @@ final class UsageHistoryModel: ObservableObject {
         retention: HistoryRetention,
         accountKey: String
     ) {
-        guard let store else { return }
+        guard let store, !isRestoring, !needsRestart else { return }
         if activeAccountKey == accountKey {
             tokenUsage = snapshot
         }
@@ -128,6 +130,7 @@ final class UsageHistoryModel: ObservableObject {
         resetExisting: Bool,
         claimLegacyHistory: Bool
     ) {
+        guard !isRestoring, !needsRestart else { return }
         activeAccountKey = accountKey
         quotaWindows = []
         quotaSamples = []
@@ -224,6 +227,28 @@ final class UsageHistoryModel: ObservableObject {
             throw UsageHistoryStoreError.openDatabase("No active account history is available.")
         }
         return try await store.exportCSV(accountKey: accountKey)
+    }
+
+    func exportBackup(salt: String, appVersion: String) async throws -> Data {
+        guard let store, !isRestoring, !needsRestart else { throw HistoryBackupError.storageFailure }
+        return try await store.exportBackup(identitySalt: salt, appVersion: appVersion)
+    }
+
+    func restoreBackup(from url: URL, salt: String, appVersion: String) async throws -> URL {
+        guard let store, !isRestoring, !needsRestart else { throw HistoryBackupError.storageFailure }
+        isRestoring = true
+        defer { isRestoring = false }
+        await accountPreparationTask?.value
+        let recovery = try await store.restoreBackup(
+            from: url, identitySalt: salt, appVersion: appVersion,
+            persistSalt: { salt in
+                UserDefaults.standard.set(salt, forKey: "history.identitySalt")
+                guard UserDefaults.standard.synchronize() else { throw HistoryBackupError.storageFailure }
+            }
+        )
+        needsRestart = true
+        deactivateAccount()
+        return recovery
     }
 
     func quotaSamples(

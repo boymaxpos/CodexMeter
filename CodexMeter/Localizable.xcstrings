@@ -491,6 +491,305 @@
         }
       }
     },
+    "backup.cancel" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消"
+          }
+        }
+      }
+    },
+    "backup.confirm_message" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This replaces history for ALL accounts on this Mac. An automatic backup is saved first. You must quit and reopen the app after restoring."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这会替换这台 Mac 上所有账号的历史，恢复前会自动保存现有数据的备份。完成后需要退出并重新打开 App。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "這會取代這台 Mac 上所有帳號的歷史，還原前會自動儲存現有資料的備份。完成後需要結束並重新開啟 App。"
+          }
+        }
+      }
+    },
+    "backup.confirm_title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replace all local history?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "替换全部本地历史？"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取代全部本機歷史？"
+          }
+        }
+      }
+    },
+    "backup.description" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back up all locally retained quota and token history for every account. Includes account-matching information, but no login credentials or app preferences. Keep the backup private. Records already removed by retention cannot be recovered."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "备份所有账号当前保留的额度与 Token 历史，包含账号匹配信息，不包含登录凭据或 App 设置。请妥善保管备份；已被保留期限清理的数据无法找回。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "備份所有帳號目前保留的額度與 Token 歷史，包含帳號匹配資訊，不包含登入憑證或 App 設定。請妥善保管備份；已被保留期限清理的資料無法找回。"
+          }
+        }
+      }
+    },
+    "backup.export" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export Full Backup…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导出完整备份…"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "匯出完整備份…"
+          }
+        }
+      }
+    },
+    "backup.exported" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backup exported successfully."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "备份导出成功。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "備份匯出成功。"
+          }
+        }
+      }
+    },
+    "backup.failed" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not complete the operation. Check file access and free space. Restore requires a valid backup from a supported CodexMeter version."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "操作未完成。请检查文件权限与可用空间。恢复需要使用受支持版本生成的有效 CodexMeter 备份。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "操作未完成。請檢查檔案權限與可用空間。還原需要使用受支援版本產生的有效 CodexMeter 備份。"
+          }
+        }
+      }
+    },
+    "backup.quit" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quit CodexMeter"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "退出 CodexMeter"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "結束 CodexMeter"
+          }
+        }
+      }
+    },
+    "backup.restart" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "History collection is paused. Quit and reopen CodexMeter to use the restored history. Your current retention setting will apply after reopening."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "历史记录已暂停写入。请退出并重新打开 CodexMeter，以使用恢复的历史。重新打开后将应用当前的历史保留期限设置。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歷史記錄已暫停寫入。請結束並重新開啟 CodexMeter，以使用還原的歷史。重新開啟後將套用目前的歷史保留期限設定。"
+          }
+        }
+      }
+    },
+    "backup.restore" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore Backup…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "恢复备份…"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "還原備份…"
+          }
+        }
+      }
+    },
+    "backup.restored" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "History restored. The previous history is saved in the automatic recovery backup."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "历史已恢复，原有历史已保存为自动恢复备份。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歷史已還原，原有歷史已儲存為自動復原備份。"
+          }
+        }
+      }
+    },
+    "backup.show_recovery" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show Automatic Recovery Backup"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示自动恢复备份"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "顯示自動復原備份"
+          }
+        }
+      }
+    },
+    "backup.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backup & Restore"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "备份与恢复"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "備份與還原"
+          }
+        }
+      }
+    },
     "CodexMeter" : {
       "comment" : "The name of the app.",
       "isCommentAutoGenerated" : true
@@ -2703,94 +3002,94 @@
         }
       }
     },
-    "error.app_server_method_unavailable": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This Codex App Server does not support the requested feature."
+    "error.app_server_method_unavailable" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This Codex App Server does not support the requested feature."
           }
         },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "当前 Codex App Server 不支持请求的功能。"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前 Codex App Server 不支持请求的功能。"
           }
         },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "目前的 Codex App Server 不支援要求的功能。"
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目前的 Codex App Server 不支援要求的功能。"
           }
         }
       }
     },
-    "error.app_server_output_too_large": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Codex App Server returned an oversized response and was stopped. Try refreshing or updating Codex CLI."
+    "error.app_server_output_too_large" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Codex App Server returned an oversized response and was stopped. Try refreshing or updating Codex CLI."
           }
         },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Codex App Server 返回的数据过大，已停止连接。请尝试刷新或更新 Codex CLI。"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Codex App Server 返回的数据过大，已停止连接。请尝试刷新或更新 Codex CLI。"
           }
         },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Codex App Server 回傳的資料過大，已停止連線。請嘗試重新整理或更新 Codex CLI。"
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Codex App Server 回傳的資料過大，已停止連線。請嘗試重新整理或更新 Codex CLI。"
           }
         }
       }
     },
-    "error.app_server_request_failed": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Codex App Server could not complete the request. Try refreshing and check your Codex login if the problem persists."
+    "error.app_server_request_failed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Codex App Server could not complete the request. Try refreshing and check your Codex login if the problem persists."
           }
         },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Codex App Server 无法完成请求。请尝试刷新；若问题持续，请检查 Codex 登录状态。"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Codex App Server 无法完成请求。请尝试刷新；若问题持续，请检查 Codex 登录状态。"
           }
         },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Codex App Server 無法完成要求。請嘗試重新整理；若問題持續，請檢查 Codex 登入狀態。"
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Codex App Server 無法完成要求。請嘗試重新整理；若問題持續，請檢查 Codex 登入狀態。"
           }
         }
       }
     },
-    "error.app_server_start_failed": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Could not start Codex App Server. Check your Codex CLI installation."
+    "error.app_server_start_failed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not start Codex App Server. Check your Codex CLI installation."
           }
         },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "无法启动 Codex App Server。请检查 Codex CLI 安装。"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法启动 Codex App Server。请检查 Codex CLI 安装。"
           }
         },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "無法啟動 Codex App Server。請檢查 Codex CLI 安裝。"
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法啟動 Codex App Server。請檢查 Codex CLI 安裝。"
           }
         }
       }
@@ -5528,6 +5827,75 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "跟隨系統"
+          }
+        }
+      }
+    },
+    "settings.category.general" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "General"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通用"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一般"
+          }
+        }
+      }
+    },
+    "settings.category.history" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "History & Backup"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "历史与备份"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歷史與備份"
+          }
+        }
+      }
+    },
+    "settings.category.menu" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menu Bar & Popover"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "菜单栏与面板"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選單列與面板"
           }
         }
       }

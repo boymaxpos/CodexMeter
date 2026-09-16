@@ -17,6 +17,11 @@ struct PopoverCustomizationView: View {
             }
 
             Section(L10n.string("settings.popover.menu_bar_ring")) {
+                Picker(L10n.string("settings.menubar_style"), selection: $settings.menuBarStyle) {
+                    ForEach(MenuBarDisplayStyle.allCases) { style in
+                        Text(style.localizedName).tag(style)
+                    }
+                }
                 Picker(
                     L10n.string("settings.popover.ring_source"),
                     selection: menuBarWindowSelection

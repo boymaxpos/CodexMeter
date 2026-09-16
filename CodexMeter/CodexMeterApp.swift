@@ -2,10 +2,9 @@ import AppKit
 import SwiftUI
 
 enum CodexMeterWindowID {
-    static let developerOptions = "developer-options"
-    static let popoverCustomization = "popover-customization"
     static let history = "usage-history"
     static let about = "about"
+    static let settings = "app-settings"
 }
 
 @main
@@ -16,6 +15,11 @@ struct CodexMeterApp: App {
     @StateObject private var updateChecker: UpdateChecker
 
     init() {
+        // Complete crash recovery before settings derives any account identity.
+        try? HistoryBackup.recoverInterruptedRestore(databaseURL: UsageHistoryStore.defaultDatabaseURL()) { salt in
+            UserDefaults.standard.set(salt, forKey: "history.identitySalt")
+            guard UserDefaults.standard.synchronize() else { throw HistoryBackupError.storageFailure }
+        }
         // The service and settings UI must share one settings instance so changes
         // such as notification thresholds take effect immediately.
         let settings = AppSettings()
@@ -53,34 +57,13 @@ struct CodexMeterApp: App {
         }
         .menuBarExtraStyle(.window)
 
-        // A sheet attached to MenuBarExtra disappears when the status window
-        // loses focus. Keep developer controls in an independent app window.
-        Window(
-            "CodexMeter",
-            id: CodexMeterWindowID.developerOptions
-        ) {
-            DeveloperOptionsView(
-                settings: settings,
-                history: history,
-                updateChecker: updateChecker
-            )
-            .appAppearance(settings.appearanceMode)
+        Window("CodexMeter", id: CodexMeterWindowID.settings) {
+            AppSettingsView(service: usageService, settings: settings,
+                            history: history, updateChecker: updateChecker)
+                .appAppearance(settings.appearanceMode)
         }
-        .defaultSize(width: 540, height: 680)
-        .windowResizability(.contentSize)
-
-        Window(
-            "CodexMeter",
-            id: CodexMeterWindowID.popoverCustomization
-        ) {
-            PopoverCustomizationView(
-                service: usageService,
-                settings: settings
-            )
-            .appAppearance(settings.appearanceMode)
-        }
-        .defaultSize(width: 520, height: 620)
-        .windowResizability(.contentSize)
+        .defaultSize(width: 840, height: 700)
+        .windowResizability(.contentMinSize)
 
         Window("CodexMeter", id: CodexMeterWindowID.history) {
             UsageHistoryView(

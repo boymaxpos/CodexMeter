@@ -26,6 +26,7 @@ actor UsageHistoryStore {
     let databaseURL: URL
     private var database: OpaquePointer?
     private var isPrepared = false
+    private var restoredAwaitingRestart = false
     private let transient = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
     init(databaseURL: URL = UsageHistoryStore.defaultDatabaseURL()) throws {
@@ -68,11 +69,110 @@ actor UsageHistoryStore {
 
     /// Completes schema setup after actor initialization so Swift 6 isolation stays valid.
     func prepareDatabase() throws {
+        guard !restoredAwaitingRestart else { throw HistoryBackupError.storageFailure }
+        guard !FileManager.default.fileExists(atPath: HistoryBackup.journalURL(for: databaseURL).path) else {
+            throw HistoryBackupError.storageFailure
+        }
         guard !isPrepared else { return }
         try execute("PRAGMA journal_mode = WAL;")
         try execute("PRAGMA foreign_keys = ON;")
         try migrateIfNeeded()
         isPrepared = true
+    }
+
+    func exportBackup(identitySalt: String, appVersion: String) throws -> Data {
+        try prepareDatabase()
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let url = directory.appendingPathComponent("snapshot.sqlite")
+        var snapshot: OpaquePointer?
+        guard sqlite3_open(url.path, &snapshot) == SQLITE_OK else {
+            sqlite3_close(snapshot)
+            throw HistoryBackupError.storageFailure
+        }
+        defer { sqlite3_close(snapshot) }
+        try HistoryBackup.copyDatabase(from: database, to: snapshot)
+        // Backup copies the source journal mode; materialize all pages into the single archive file.
+        guard sqlite3_exec(snapshot, "PRAGMA journal_mode = DELETE;", nil, nil, nil) == SQLITE_OK else {
+            throw HistoryBackupError.storageFailure
+        }
+        let info = try HistoryBackup.inspect(snapshot)
+        let data = try Data(contentsOf: url)
+        return try HistoryBackup(manifest: .init(
+            formatVersion: 1, schemaVersion: info.version, createdAt: Date(),
+            appVersion: appVersion, identitySalt: identitySalt,
+            checksum: HistoryBackup.checksum(data), rowCounts: info.counts
+        ), database: data).encoded()
+    }
+
+    /// Runs without actor suspension so queued collection cannot interleave with replacement.
+    func restoreBackup(
+        from url: URL, identitySalt: String, appVersion: String,
+        persistSalt: @Sendable (String) throws -> Void
+    ) throws -> URL {
+        try prepareDatabase()
+        let archive = try HistoryBackup.read(from: url)
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let candidateURL = directory.appendingPathComponent("candidate.sqlite")
+        try archive.database.write(to: candidateURL)
+        var candidate: OpaquePointer?
+        guard sqlite3_open_v2(candidateURL.path, &candidate, SQLITE_OPEN_READONLY, nil) == SQLITE_OK else {
+            sqlite3_close(candidate)
+            throw HistoryBackupError.invalidDatabase
+        }
+        defer { sqlite3_close(candidate) }
+        let info = try HistoryBackup.inspect(candidate)
+        guard info.version == archive.manifest.schemaVersion, info.counts == archive.manifest.rowCounts else {
+            throw HistoryBackupError.invalidDatabase
+        }
+        // Validate expected columns before touching the destination.
+        for sql in [
+            "SELECT account_key,window_id,window_name,sampled_at,remaining_percent,window_duration_mins,resets_at,is_anchor,is_stale,starts_segment,source FROM quota_samples LIMIT 0",
+            "SELECT account_key,start_date,tokens,fetched_at FROM token_daily LIMIT 0",
+            "SELECT account_key,lifetime_tokens,peak_daily_tokens,current_streak_days,longest_streak_days,longest_running_turn_sec,fetched_at FROM token_summary LIMIT 0"
+        ] {
+            var statement: OpaquePointer?
+            let result = sqlite3_prepare_v2(candidate, sql, -1, &statement, nil)
+            sqlite3_finalize(statement)
+            guard result == SQLITE_OK else { throw HistoryBackupError.invalidDatabase }
+        }
+        let recoveryDirectory = databaseURL.deletingLastPathComponent().appendingPathComponent("Backups")
+        try FileManager.default.createDirectory(at: recoveryDirectory, withIntermediateDirectories: true)
+        let recovery = recoveryDirectory.appendingPathComponent("Before-restore-\(UUID().uuidString).codexmeterbackup")
+        let oldArchive = try exportBackup(identitySalt: identitySalt, appVersion: appVersion)
+        try oldArchive.write(to: recovery, options: .atomic)
+        let rollbackURL = directory.appendingPathComponent("rollback.sqlite")
+        try PropertyListDecoder().decode(HistoryBackup.self, from: oldArchive).database.write(to: rollbackURL)
+        var rollback: OpaquePointer?
+        guard sqlite3_open_v2(rollbackURL.path, &rollback, SQLITE_OPEN_READONLY, nil) == SQLITE_OK else {
+            sqlite3_close(rollback)
+            throw HistoryBackupError.storageFailure
+        }
+        defer { sqlite3_close(rollback) }
+        let journal = HistoryBackup.journalURL(for: databaseURL)
+        try oldArchive.write(to: journal, options: .atomic)
+        do {
+            try HistoryBackup.copyDatabase(from: candidate, to: database)
+            try migrateIfNeeded()
+            guard try HistoryBackup.inspect(database).counts == info.counts else {
+                throw HistoryBackupError.invalidDatabase
+            }
+            try persistSalt(archive.manifest.identitySalt)
+            try FileManager.default.removeItem(at: journal)
+        } catch {
+            try HistoryBackup.copyDatabase(from: rollback, to: database)
+            try persistSalt(identitySalt)
+            try FileManager.default.removeItem(at: journal)
+            throw error
+        }
+        // No old-account callbacks may append data until fresh identity activation on launch.
+        restoredAwaitingRestart = true
+        // The in-memory guard protects all public read/write entry points.
+        _ = sqlite3_exec(database, "PRAGMA query_only = ON;", nil, nil, nil)
+        return recovery
     }
 
     func recordQuotaSnapshots(

@@ -5,14 +5,17 @@ struct AboutView: View {
     @ObservedObject var settings: AppSettings
     @ObservedObject var history: UsageHistoryModel
     @ObservedObject var updateChecker: UpdateChecker
+    var embedded = false
     @Environment(\.dismiss) private var dismiss
 
     private let repositoryURL = URL(string: "https://github.com/raycalrui/CodexMeter")!
 
     var body: some View {
         VStack(spacing: 0) {
-            header
-            Divider()
+            if !embedded {
+                header
+                Divider()
+            }
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
@@ -25,8 +28,7 @@ struct AboutView: View {
                 .padding(18)
             }
         }
-        .frame(width: 500, height: 620)
-        .background(WindowTitleUpdater(title: L10n.string("about.title")))
+        .frame(minWidth: 500, maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var header: some View {
