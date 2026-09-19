@@ -323,6 +323,8 @@ Codex App Server.
   would be misleading.
 - Recalculate remaining-time UI locally once per minute without an extra server
   request.
+- Show seconds in the popover's last-updated timestamp so successful ten-second
+  refreshes are visible; keep other time formatting unchanged.
 
 ## macOS settings
 
