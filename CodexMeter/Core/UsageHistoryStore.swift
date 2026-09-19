@@ -175,15 +175,17 @@ actor UsageHistoryStore {
         return recovery
     }
 
+    @discardableResult
     func recordQuotaSnapshots(
         _ windows: [CodexUsageWindow],
         at date: Date,
         isStale: Bool,
         source: QuotaSampleSource,
         accountKey: String = HistoryAccountIdentity.legacyKey
-    ) throws {
+    ) throws -> Bool {
         try prepareDatabase()
-        guard !isStale else { return }
+        guard !isStale else { return false }
+        var inserted = false
         try transaction {
             for window in windows {
                 let previous = try latestQuotaSample(
@@ -229,8 +231,10 @@ actor UsageHistoryStore {
                     source: source,
                     accountKey: accountKey
                 )
+                inserted = true
             }
         }
+        return inserted
     }
 
     func recordTokenUsage(

@@ -306,8 +306,15 @@ Codex App Server.
 
 ## Refresh and freshness rules
 
-- Refresh immediately at launch, every 60 seconds, after an App Server rate-
-  limit notification, and when the user requests it manually.
+- Refresh quota immediately at launch, every 10 seconds (one-second timer
+  tolerance), after an App Server rate-limit notification, and on manual request.
+  Poll account metadata and optional Token Activity at most once per minute;
+  explicit account changes immediately reset those schedules and usage caches.
+  Automatic refresh failures back off for 20, 40, 80, 160, then 300 seconds;
+  successful quota reads reset backoff. Manual and server-event refreshes may
+  bypass it. Keep the existing single child-restart recovery attempt.
+  Compare token content without fetchedAt before writing it; only invalidate
+  quota history views when a changed sample or 15-minute anchor was inserted.
 - Skip a refresh while the previous rate-limit request is still in flight.
 - Time out a rate-limit request after 20 seconds.
 - On failure, retain the last successful quota snapshot and mark it as possibly

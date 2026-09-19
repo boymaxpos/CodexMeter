@@ -49,6 +49,7 @@ final class CodexUsageService: ObservableObject {
     private var usageRequestID: Int?
     private var historyAccountKey: String?
     private var hasPendingAccountBoundary = false
+    private var refreshSchedule = CodexRefreshSchedule()
 
     init(
         settings: AppSettings,
@@ -226,11 +227,19 @@ final class CodexUsageService: ObservableObject {
         }
         errorMessage = nil
 
-        _ = sendRequest(
-            method: "account/read",
-            params: ["refreshToken": forceTokenRefresh],
-            kind: .account
-        )
+        let now = Date()
+        if forceTokenRefresh || refreshSchedule.accountDue(at: now) {
+            // Drop unanswered account requests before retrying; ignore their late replies.
+            pendingRequests = pendingRequests.filter { $0.value != .account }
+            refreshSchedule.lastAccountAttempt = now
+            _ = sendRequest(
+                method: "account/read",
+                params: ["refreshToken": forceTokenRefresh],
+                kind: .account
+            )
+        } else if !pendingRequests.values.contains(.account) {
+            requestTokenUsageIfNeeded()
+        }
 
         guard let requestID = sendRequest(
             method: "account/rateLimits/read",
@@ -248,7 +257,8 @@ final class CodexUsageService: ObservableObject {
         scheduleRefreshTimeout(for: requestID)
     }
 
-    func refreshIfNeeded(maxAge: TimeInterval = 60) {
+    func refreshIfNeeded(maxAge: TimeInterval = 10) {
+        guard refreshSchedule.mayPoll(at: Date()) else { return }
         guard let lastUpdated else {
             refresh()
             return
@@ -287,12 +297,14 @@ final class CodexUsageService: ObservableObject {
     private func installRefreshTimer() {
         guard refreshTimer == nil else { return }
         // This refreshes server data. Countdown-only UI updates use TimelineView.
-        let timer = Timer(timeInterval: 60, repeats: true) { [weak self] _ in
+        let timer = Timer(timeInterval: CodexRefreshSchedule.quotaInterval, repeats: true) { [weak self] _ in
             DispatchQueue.main.async {
-                self?.refresh()
+                guard let self, self.refreshSchedule.mayPoll(at: Date()),
+                      self.restartWorkItem == nil else { return }
+                self.refresh()
             }
         }
-        timer.tolerance = 10
+        timer.tolerance = 1
         RunLoop.main.add(timer, forMode: .common)
         refreshTimer = timer
     }
@@ -486,6 +498,7 @@ final class CodexUsageService: ObservableObject {
         switch kind {
         case .initialize:
             didInitialize = true
+            refreshSchedule.lastAccountAttempt = nil
             _ = send(["method": "initialized", "params": [:]])
             refresh()
         case .account:
@@ -519,6 +532,7 @@ final class CodexUsageService: ObservableObject {
         rateLimitResetCredits = nil
         historyAccountKey = nil
         hasPendingAccountBoundary = true
+        refreshSchedule = CodexRefreshSchedule()
         history.deactivateAccount()
         notificationManager.resetEvaluationState()
 
@@ -559,6 +573,8 @@ final class CodexUsageService: ObservableObject {
         hasPendingAccountBoundary = false
 
         if accountChanged {
+            tokenUsage = nil
+            refreshSchedule.lastUsageAttempt = nil
             history.activateAccount(
                 identity.key,
                 resetExisting: shouldResetAnonymousHistory,
@@ -612,7 +628,7 @@ final class CodexUsageService: ObservableObject {
         }
 
         let updatedAt = Date()
-        windows = parsed
+        if windows != parsed { windows = parsed }
         rateLimitResetCredits = CodexRateLimitResetCreditsSummary.decode(
             fromRateLimitsResult: result
         )
@@ -622,6 +638,7 @@ final class CodexUsageService: ObservableObject {
         lastUpdated = updatedAt
         errorMessage = nil
         didAttemptAccountRecovery = false
+        refreshSchedule.succeeded()
 
         if let historyAccountKey {
             history.recordQuota(
@@ -643,7 +660,9 @@ final class CodexUsageService: ObservableObject {
     }
 
     private func requestTokenUsageIfNeeded() {
-        guard usageRequestID == nil else { return }
+        guard usageRequestID == nil, historyAccountKey != nil,
+              refreshSchedule.usageDue(at: Date()) else { return }
+        refreshSchedule.lastUsageAttempt = Date()
         guard let id = sendRequest(
             method: "account/usage/read",
             params: NSNull(),
@@ -686,9 +705,12 @@ final class CodexUsageService: ObservableObject {
             ),
             fetchedAt: Date()
         )
-        tokenUsage = snapshot
         isTokenUsageUnavailable = false
         tokenUsageErrorMessage = nil
+        // fetchedAt changes on every response; it is not a change in usage data.
+        guard tokenUsage?.dailyBuckets != snapshot.dailyBuckets
+                || tokenUsage?.summary != snapshot.summary else { return }
+        tokenUsage = snapshot
         if let historyAccountKey {
             history.recordTokenUsage(
                 snapshot,
@@ -859,6 +881,7 @@ final class CodexUsageService: ObservableObject {
     }
 
     private func markFailure(_ message: String) {
+        refreshSchedule.failed(at: Date())
         isLoading = false
         isRefreshInFlight = false
         // Preserve the last successful snapshot and explicitly mark it as stale.

@@ -3,6 +3,35 @@ import XCTest
 @testable import CodexMeterCore
 
 final class CodexProcessSupportTests: XCTestCase {
+    func testRefreshDetailsStayAtOneMinute() {
+        let now = Date(timeIntervalSince1970: 1_000)
+        var schedule = CodexRefreshSchedule()
+        XCTAssertTrue(schedule.accountDue(at: now))
+        XCTAssertTrue(schedule.usageDue(at: now))
+        schedule.lastAccountAttempt = now
+        schedule.lastUsageAttempt = now
+        for seconds in stride(from: 10, through: 50, by: 10) {
+            XCTAssertFalse(schedule.accountDue(at: now.addingTimeInterval(Double(seconds))))
+            XCTAssertFalse(schedule.usageDue(at: now.addingTimeInterval(Double(seconds))))
+        }
+        XCTAssertTrue(schedule.accountDue(at: now.addingTimeInterval(60)))
+        XCTAssertTrue(schedule.usageDue(at: now.addingTimeInterval(60)))
+    }
+
+    func testRefreshBackoffCapsAndRecovers() {
+        let now = Date(timeIntervalSince1970: 1_000)
+        var schedule = CodexRefreshSchedule()
+        for delay: TimeInterval in [20, 40, 80, 160, 300, 300] {
+            schedule.failed(at: now)
+            XCTAssertFalse(schedule.mayPoll(at: now.addingTimeInterval(delay - 1)))
+            XCTAssertTrue(schedule.mayPoll(at: now.addingTimeInterval(delay)))
+        }
+        schedule.succeeded()
+        XCTAssertTrue(schedule.mayPoll(at: now))
+        schedule.failed(at: now)
+        XCTAssertEqual(schedule.retryAfter, now.addingTimeInterval(20))
+    }
+
     func testExecutableLocatorFindsCodexInstalledByNVM() throws {
         let fileManager = FileManager.default
         let homeDirectory = fileManager.temporaryDirectory.resolvingSymlinksInPath()

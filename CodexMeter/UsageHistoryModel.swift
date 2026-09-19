@@ -45,13 +45,14 @@ final class UsageHistoryModel: ObservableObject {
         Task {
             await accountPreparationTask?.value
             do {
-                try await store.recordQuotaSnapshots(
+                let changed = try await store.recordQuotaSnapshots(
                     windows,
                     at: date,
                     isStale: isStale,
                     source: source,
                     accountKey: accountKey
                 )
+                guard changed else { return }
                 try await store.applyRetention(retention, now: date)
                 if activeAccountKey == accountKey {
                     dataRevision += 1

@@ -53,8 +53,10 @@ visible at a glance.
   redeem a reset.
 - Compares remaining quota with remaining time to indicate whether consumption
   is on pace.
-- Refreshes on launch, every 60 seconds, after a Codex rate-limit update, and on
-  manual request.
+- Refreshes quota on launch, every 10 seconds, after a Codex rate-limit update,
+  and on manual request. Account checks and Token Activity polling stay at
+  one-minute intervals. Failed automatic refreshes back off up to five minutes;
+  unchanged token responses do not rewrite history.
 - Detects Codex account changes and switches quota data without requiring an app
   restart.
 - Supports standalone and npm-installed Codex CLI launchers by supplying common

@@ -1,6 +1,37 @@
 import Foundation
 import Darwin
 
+struct CodexRefreshSchedule {
+    static let quotaInterval: TimeInterval = 10
+    static let detailInterval: TimeInterval = 60
+    var lastAccountAttempt: Date?
+    var lastUsageAttempt: Date?
+    private(set) var retryAfter: Date?
+    private var failures = 0
+
+    func mayPoll(at now: Date) -> Bool {
+        retryAfter.map { now >= $0 } ?? true
+    }
+
+    func accountDue(at now: Date) -> Bool {
+        lastAccountAttempt.map { now.timeIntervalSince($0) >= Self.detailInterval } ?? true
+    }
+
+    func usageDue(at now: Date) -> Bool {
+        lastUsageAttempt.map { now.timeIntervalSince($0) >= Self.detailInterval } ?? true
+    }
+
+    mutating func failed(at now: Date) {
+        failures = min(failures + 1, 5)
+        retryAfter = now.addingTimeInterval(min(300, 20 * pow(2, Double(failures - 1))))
+    }
+
+    mutating func succeeded() {
+        failures = 0
+        retryAfter = nil
+    }
+}
+
 enum CodexExecutableLocator {
     static func locate(
         homeDirectory: URL,

@@ -10,15 +10,21 @@ final class HistoryTests: XCTestCase {
 
         let start = Date(timeIntervalSince1970: 1_700_000_000)
         let window = usageWindow(usedPercent: 25, resetsAt: start.addingTimeInterval(3_600))
-        try await fixture.store.recordQuotaSnapshots(
+        let initialInserted = try await fixture.store.recordQuotaSnapshots(
             [window], at: start, isStale: false, source: .refresh
         )
-        try await fixture.store.recordQuotaSnapshots(
-            [window], at: start.addingTimeInterval(60), isStale: false, source: .refresh
-        )
-        try await fixture.store.recordQuotaSnapshots(
+        XCTAssertTrue(initialInserted)
+        for seconds in stride(from: 10, to: 15 * 60, by: 10) {
+            let inserted = try await fixture.store.recordQuotaSnapshots(
+                [window], at: start.addingTimeInterval(Double(seconds)),
+                isStale: false, source: .refresh
+            )
+            XCTAssertFalse(inserted)
+        }
+        let anchorInserted = try await fixture.store.recordQuotaSnapshots(
             [window], at: start.addingTimeInterval(15 * 60), isStale: false, source: .refresh
         )
+        XCTAssertTrue(anchorInserted)
 
         let samples = try await fixture.store.quotaSamples(
             windowID: window.historyID,
