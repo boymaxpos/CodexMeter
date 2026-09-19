@@ -57,6 +57,11 @@ has changed.
   dynamic status and content area scrolls when it exceeds the available space.
   Keep those regions as true vertical siblings and clip the middle scroll view
   so translucent fixed controls never reveal content rendered underneath them.
+  On macOS 15+, hide popover scroll indicators on opening until the first user
+  scroll, then restore automatic native visibility and fade-out for that opening;
+  older systems retain native behavior.
+  Reserve a 12-point trailing gutter for the popover scroller by extending only
+  the scroll viewport into the outer padding; keep content aligned with the header.
 - `MenuBarProgressView.swift` draws the selected ring, bar, percentage, and
   caption style into an original-color `NSImage`. Keep the status-item label
   free of nested dynamic layout containers. Omit time indicators when reset

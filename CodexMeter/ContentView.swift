@@ -1,6 +1,28 @@
 import AppKit
 import SwiftUI
 
+private struct ScrollOnlyPopoverIndicators: ViewModifier {
+    @State private var hasScrolled = false
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if #available(macOS 15.0, *) {
+            content
+                .scrollIndicators(hasScrolled ? .automatic : .hidden)
+                .onScrollPhaseChange { _, phase in
+                    // Once scrolling begins, let AppKit own its normal fade-out.
+                    if phase == .interacting || phase == .decelerating {
+                        hasScrolled = true
+                    }
+                }
+                .onAppear { hasScrolled = false }
+                .onDisappear { hasScrolled = false }
+        } else {
+            content
+        }
+    }
+}
+
 struct ContentView: View {
     @ObservedObject var service: CodexUsageService
     @ObservedObject var settings: AppSettings
@@ -16,8 +38,11 @@ struct ContentView: View {
 
             ScrollView {
                 scrollableContent
+                    .padding(.trailing, 12)
             }
+            .modifier(ScrollOnlyPopoverIndicators())
             .clipped()
+            .padding(.trailing, -12)
 
             bottomControls
                 .layoutPriority(1)
