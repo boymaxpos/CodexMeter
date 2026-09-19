@@ -114,6 +114,9 @@ visible at a glance.
 
 ## How It Works
 
+Changed digits in the menu bar percentage briefly turn red when quota decreases,
+hold red for half a second, then smoothly fade back over two seconds; the percent sign keeps its normal color.
+
 CodexMeter launches the locally installed Codex CLI as:
 
 ```text

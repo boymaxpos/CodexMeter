@@ -11,11 +11,69 @@ struct MenuBarProgressView: View {
     let attentionLevel: QuotaAttentionLevel
     let isStale: Bool
     let appearance: MenuBarAppearance
+    var flashContext: String? = nil
+
+    @State private var previousFlashSample: FlashSample?
+    @State private var flashIntensity: CGFloat = 0
+    @State private var changedDigitIndices: Set<Int> = []
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    private var renderedFlashIntensity: CGFloat = 0
+    private var renderedDigitIndices: Set<Int> = []
+
+    private struct FlashSample: Equatable {
+        let context: String?
+        let remaining: Int?
+        let stale: Bool
+        let style: MenuBarDisplayStyle
+    }
+
+    private var flashSample: FlashSample {
+        FlashSample(context: flashContext, remaining: remainingPercent, stale: isStale, style: style)
+    }
 
     var body: some View {
         Image(nsImage: statusImage)
             .renderingMode(.original)
             .accessibilityLabel(accessibilityText)
+            .task(id: flashSample) {
+                let current = flashSample
+                let previous = previousFlashSample
+                previousFlashSample = current
+                flashIntensity = 0
+                changedDigitIndices = []
+                guard current.context != nil,
+                      previous?.context == current.context,
+                      previous?.style == current.style,
+                      current.style != .progressOnly,
+                      !current.stale, previous?.stale == false,
+                      let oldValue = previous?.remaining,
+                      let newValue = current.remaining,
+                      newValue < oldValue else { return }
+
+                // Compare place values from the right, including 100 -> 99 and 10 -> 9.
+                let oldDigits = Array(String(oldValue).reversed())
+                let newDigits = Array(String(newValue))
+                changedDigitIndices = Set(newDigits.indices.filter { index in
+                    let place = newDigits.count - 1 - index
+                    return place >= oldDigits.count || newDigits[index] != oldDigits[place]
+                })
+                flashIntensity = 1
+                // NSImage pixels do not interpolate through SwiftUI animations.
+                // Render a bounded fade only while a decrease is being highlighted.
+                do {
+                    try await Task.sleep(nanoseconds: 500_000_000)
+                    for frame in 1...(reduceMotion ? 1 : 100) {
+                        try await Task.sleep(nanoseconds: reduceMotion ? 2_000_000_000 : 20_000_000)
+                        try Task.checkCancellation()
+                        let progress = reduceMotion ? 1 : Double(frame) / 100
+                        flashIntensity = CGFloat(1 - progress * progress * (3 - 2 * progress))
+                    }
+                } catch { }
+            }
+            .onDisappear {
+                flashIntensity = 0
+                previousFlashSample = nil
+            }
     }
 
     private var normalizedAppearance: MenuBarAppearance {
@@ -54,6 +112,12 @@ struct MenuBarProgressView: View {
     }
 
     private var statusImage: NSImage {
+        // Read State during body evaluation, before AppKit's deferred drawing.
+        // Each image captures immutable frame values and invalidates independently
+        // of the next server refresh.
+        var renderer = self
+        renderer.renderedFlashIntensity = flashIntensity
+        renderer.renderedDigitIndices = changedDigitIndices
         let appearance = normalizedAppearance
         let size = imageSize
         let image = NSImage(size: size, flipped: false) { rect in
@@ -76,7 +140,7 @@ struct MenuBarProgressView: View {
                     appearance: appearance
                 )
                 cursorX += diameter + CGFloat(appearance.indicatorTextSpacing)
-                drawPercentageAndCaption(
+                renderer.drawPercentageAndCaption(
                     in: NSRect(
                         x: cursorX,
                         y: 0,
@@ -100,7 +164,7 @@ struct MenuBarProgressView: View {
                     trackOpacity: appearance.trackOpacity
                 )
                 cursorX += CGFloat(appearance.barWidth + appearance.indicatorTextSpacing)
-                drawSingleLineTitle(
+                renderer.drawSingleLineTitle(
                     in: NSRect(
                         x: cursorX,
                         y: 0,
@@ -117,7 +181,7 @@ struct MenuBarProgressView: View {
                     width: CGFloat(appearance.textWidth),
                     height: rect.height - CGFloat(appearance.barHeight + 2)
                 )
-                drawSingleLineTitle(in: textRect, appearance: appearance)
+                renderer.drawSingleLineTitle(in: textRect, appearance: appearance)
                 drawProgressBar(
                     value: remainingPercent.map(Double.init),
                     color: attentionColor(appearance: appearance),
@@ -159,7 +223,7 @@ struct MenuBarProgressView: View {
                     trackOpacity: appearance.trackOpacity
                 )
                 cursorX += barWidth + CGFloat(appearance.indicatorTextSpacing)
-                drawSingleLineTitle(
+                renderer.drawSingleLineTitle(
                     in: NSRect(
                         x: cursorX,
                         y: 0,
@@ -170,7 +234,7 @@ struct MenuBarProgressView: View {
                 )
 
             case .percentageOnly:
-                drawPercentageAndCaption(
+                renderer.drawPercentageAndCaption(
                     in: NSRect(
                         x: cursorX,
                         y: 0,
@@ -335,7 +399,8 @@ struct MenuBarProgressView: View {
                     ofSize: appearance.percentageFontSize,
                     weight: appearance.percentageFontWeight.nsWeight
                 ),
-                color: .labelColor
+                color: .labelColor,
+                highlightsChangedDigits: true
             )
             drawText(
                 appearance.captionText,
@@ -370,22 +435,35 @@ struct MenuBarProgressView: View {
                 ofSize: appearance.percentageFontSize,
                 weight: appearance.percentageFontWeight.nsWeight
             ),
-            color: .labelColor
+            color: .labelColor,
+            highlightsChangedDigits: true
         )
     }
 
-    private func drawText(_ value: String, in rect: NSRect, font: NSFont, color: NSColor) {
+    private func drawText(
+        _ value: String, in rect: NSRect, font: NSFont, color: NSColor,
+        highlightsChangedDigits: Bool = false
+    ) {
         let paragraph = NSMutableParagraphStyle()
         paragraph.alignment = .center
         paragraph.lineBreakMode = .byClipping
-        (value as NSString).draw(
-            in: rect,
-            withAttributes: [
+        let text = NSMutableAttributedString(
+            string: value,
+            attributes: [
                 .font: font,
                 .foregroundColor: color,
                 .paragraphStyle: paragraph
             ]
         )
+        if highlightsChangedDigits, renderedFlashIntensity > 0 {
+            let highlight = color.blended(withFraction: renderedFlashIntensity, of: .systemRed) ?? .systemRed
+            for index in renderedDigitIndices where index < text.length {
+                let character = (value as NSString).substring(with: NSRange(location: index, length: 1))
+                guard character.rangeOfCharacter(from: .decimalDigits) != nil else { continue }
+                text.addAttribute(.foregroundColor, value: highlight, range: NSRange(location: index, length: 1))
+            }
+        }
+        text.draw(in: rect)
     }
 
     private func drawUnknown(in rect: NSRect) {

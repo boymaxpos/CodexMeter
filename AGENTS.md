@@ -66,6 +66,11 @@ has changed.
   caption style into an original-color `NSImage`. Keep the status-item label
   free of nested dynamic layout containers. Omit time indicators when reset
   timing is missing.
+  When fresh quota decreases within the same account and selected window, hold
+  only changed percentage digits red for 0.5 seconds, then fade back over 2 seconds.
+  Reset the comparison on context,
+  style, stale-state, or preview changes; use a cancellable bounded fade and keep
+  the percent sign unchanged. With Reduce Motion, restore the color without fading.
 - `CodexUsageService.swift` launches the installed `codex app-server` process
   over stdio, communicates with it using newline-delimited JSON-RPC, and owns
   refresh/freshness state. Build a deterministic child-process `PATH` from the

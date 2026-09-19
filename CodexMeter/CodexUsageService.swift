@@ -47,7 +47,7 @@ final class CodexUsageService: ObservableObject {
     private var didAttemptAccountRecovery = false
     private var rateLimitRequestSources: [Int: QuotaSampleSource] = [:]
     private var usageRequestID: Int?
-    private var historyAccountKey: String?
+    private(set) var historyAccountKey: String?
     private var hasPendingAccountBoundary = false
     private var refreshSchedule = CodexRefreshSchedule()
 

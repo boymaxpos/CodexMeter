@@ -52,7 +52,10 @@ struct CodexMeterApp: App {
                 style: settings.menuBarStyle,
                 attentionLevel: menuBarSnapshot.attentionLevel,
                 isStale: menuBarSnapshot.isStale,
-                appearance: settings.developerAppearance
+                appearance: settings.developerAppearance,
+                flashContext: settings.developerPreviewEnabled ? nil : usageService.historyAccountKey.map {
+                    $0 + ":" + (settings.popoverContent.selectedMenuBarWindow(from: usageService.windows)?.historyID ?? "")
+                }
             )
         }
         .menuBarExtraStyle(.window)
