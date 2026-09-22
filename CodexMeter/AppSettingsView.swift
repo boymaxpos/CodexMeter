@@ -8,6 +8,7 @@ struct AppSettingsView: View {
     @ObservedObject var settings: AppSettings
     @ObservedObject var history: UsageHistoryModel
     @ObservedObject var updateChecker: UpdateChecker
+    @ObservedObject var mqttPublisher: MQTTHomeAssistantPublisher
     @Environment(\.openWindow) private var openWindow
     @State private var selection: String? = "settings.category.general"
     @State private var showsClearConfirmation = false
@@ -16,6 +17,7 @@ struct AppSettingsView: View {
     private let categories = [
         ("settings.category.general", "gearshape"),
         ("settings.category.menu", "menubar.rectangle"),
+        ("settings.category.mqtt", "antenna.radiowaves.left.and.right"),
         ("settings.category.history", "externaldrive"),
         ("developer.title", "hammer"),
         ("about.title", "info.circle")
@@ -36,6 +38,8 @@ struct AppSettingsView: View {
                     PopoverCustomizationView(service: service, settings: settings)
                 case "settings.category.history":
                     historySettings
+                case "settings.category.mqtt":
+                    mqttSettings
                 case "developer.title":
                     DeveloperOptionsView(settings: settings, history: history,
                                          updateChecker: updateChecker, embedded: true)
@@ -125,6 +129,78 @@ struct AppSettingsView: View {
         }
         .formStyle(.grouped)
         .task { await history.refreshMetadata() }
+    }
+
+    private var mqttSettings: some View {
+        Form {
+            Section {
+                Toggle(L10n.string("mqtt.enabled"), isOn: $settings.mqttConfiguration.enabled)
+                LabeledContent(L10n.string("mqtt.status")) {
+                    Text(L10n.string(mqttPublisher.statusKey))
+                        .foregroundStyle(.secondary)
+                }
+                if let lastPublished = mqttPublisher.lastPublished {
+                    LabeledContent(L10n.string("mqtt.last_published")) {
+                        Text(lastPublished, style: .relative)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                Button(L10n.string("mqtt.publish_now")) {
+                    if let updatedAt = service.lastUpdated, !service.windows.isEmpty {
+                        mqttPublisher.publish(
+                            windows: service.windows,
+                            updatedAt: updatedAt,
+                            isStale: service.isStale
+                        )
+                    } else {
+                        service.refresh()
+                    }
+                }
+                .disabled(!settings.mqttConfiguration.isReady)
+            } header: {
+                Text(L10n.string("mqtt.section.connection"))
+            } footer: {
+                Text(L10n.string("mqtt.connection_help"))
+            }
+
+            Section(L10n.string("mqtt.section.broker")) {
+                TextField(L10n.string("mqtt.host"), text: $settings.mqttConfiguration.host)
+                TextField(
+                    L10n.string("mqtt.port"),
+                    value: $settings.mqttConfiguration.port,
+                    format: .number.grouping(.never)
+                )
+                TextField(L10n.string("mqtt.username"), text: $settings.mqttConfiguration.username)
+                SecureField(L10n.string("mqtt.password"), text: $settings.mqttPassword)
+                Toggle(L10n.string("mqtt.tls"), isOn: $settings.mqttConfiguration.useTLS)
+            }
+            .disabled(!settings.mqttConfiguration.enabled)
+
+            Section(L10n.string("mqtt.section.home_assistant")) {
+                TextField(
+                    L10n.string("mqtt.discovery_prefix"),
+                    text: $settings.mqttConfiguration.discoveryPrefix
+                )
+                TextField(
+                    L10n.string("mqtt.base_topic"),
+                    text: $settings.mqttConfiguration.baseTopic
+                )
+                TextField(
+                    L10n.string("mqtt.client_id"),
+                    text: $settings.mqttConfiguration.clientID
+                )
+                TextField(
+                    L10n.string("mqtt.device_name"),
+                    text: $settings.mqttConfiguration.deviceName
+                )
+                Toggle(L10n.string("mqtt.retain"), isOn: $settings.mqttConfiguration.retain)
+            }
+            .disabled(!settings.mqttConfiguration.enabled)
+        }
+        .formStyle(.grouped)
+        .onChange(of: settings.mqttConfiguration) { _ in
+            mqttPublisher.configurationDidChange()
+        }
     }
 
     private func exportCSV() {

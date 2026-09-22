@@ -5831,6 +5831,181 @@
         }
       }
     },
+    "mqtt.base_topic" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Base topic" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "基础主题" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "基礎主題" } }
+      }
+    },
+    "mqtt.client_id" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Client ID" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "客户端 ID" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "用戶端 ID" } }
+      }
+    },
+    "mqtt.connection_help" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Publishes retained quota state and Home Assistant MQTT Discovery messages after each Codex refresh. The broker may run in Docker on another device." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "每次刷新 Codex 后发布保留的额度状态和 Home Assistant MQTT Discovery 消息。代理可运行在另一台设备的 Docker 中。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "每次重新整理 Codex 後發佈保留的額度狀態和 Home Assistant MQTT Discovery 訊息。代理可在另一台裝置的 Docker 中執行。" } }
+      }
+    },
+    "mqtt.device_name" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Device name" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "设备名称" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "裝置名稱" } }
+      }
+    },
+    "mqtt.discovery_prefix" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Discovery prefix" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Discovery 前缀" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "Discovery 前綴" } }
+      }
+    },
+    "mqtt.enabled" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Publish quota over MQTT" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "通过 MQTT 发布额度" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "透過 MQTT 發佈額度" } }
+      }
+    },
+    "mqtt.host" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Broker host" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "代理主机" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "代理主機" } }
+      }
+    },
+    "mqtt.last_published" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Last published" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "上次发布" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "上次發佈" } }
+      }
+    },
+    "mqtt.password" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Password" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "密码" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "密碼" } }
+      }
+    },
+    "mqtt.password_save_failed" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The MQTT password could not be saved in Keychain." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "无法将 MQTT 密码保存到钥匙串。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "無法將 MQTT 密碼儲存到鑰匙圈。" } }
+      }
+    },
+    "mqtt.port" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Port" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "端口" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "連接埠" } }
+      }
+    },
+    "mqtt.publish_now" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Publish now" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "立即发布" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "立即發佈" } }
+      }
+    },
+    "mqtt.retain" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Retain state" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "保留状态" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "保留狀態" } }
+      }
+    },
+    "mqtt.section.broker" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Broker" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "代理服务器" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "代理伺服器" } }
+      }
+    },
+    "mqtt.section.connection" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "MQTT connection" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "MQTT 连接" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "MQTT 連線" } }
+      }
+    },
+    "mqtt.section.home_assistant" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Home Assistant Discovery" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Home Assistant Discovery" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "Home Assistant Discovery" } }
+      }
+    },
+    "mqtt.status" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Status" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "状态" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "狀態" } }
+      }
+    },
+    "mqtt.status.connecting" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Connecting…" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "正在连接…" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "正在連線…" } }
+      }
+    },
+    "mqtt.status.disabled" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Disabled" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "已关闭" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "已關閉" } }
+      }
+    },
+    "mqtt.status.error" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Connection failed" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "连接失败" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "連線失敗" } }
+      }
+    },
+    "mqtt.status.idle" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Waiting for quota" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "等待额度数据" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "等待額度資料" } }
+      }
+    },
+    "mqtt.status.invalid" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Broker host required" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "需要代理主机" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "需要代理主機" } }
+      }
+    },
+    "mqtt.status.online" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Online" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "在线" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "在線" } }
+      }
+    },
+    "mqtt.tls" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Use TLS" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "使用 TLS" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "使用 TLS" } }
+      }
+    },
+    "mqtt.username" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Username" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "用户名" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "使用者名稱" } }
+      }
+    },
     "settings.category.general" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -5898,6 +6073,13 @@
             "value" : "選單列與面板"
           }
         }
+      }
+    },
+    "settings.category.mqtt" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "MQTT" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "MQTT" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "MQTT" } }
       }
     },
     "settings.error_title" : {

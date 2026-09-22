@@ -26,7 +26,7 @@ final class UpdateChecker: NSObject, ObservableObject, SPUUpdaterDelegate {
     @Published private(set) var automaticallyInstallsUpdates = false
     @Published private(set) var isDeveloperPreview = false
 
-    private let releasesURL = URL(string: "https://github.com/raycalrui/CodexMeter/releases")!
+    private let releasesURL = URL(string: "https://github.com/boymaxpos/CodexMeter/releases")!
     private var includesPrereleases: Bool
     private var stateBeforeDeveloperPreview: State?
     private var updaterController: SPUStandardUpdaterController!

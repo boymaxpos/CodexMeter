@@ -8,7 +8,7 @@ struct AboutView: View {
     var embedded = false
     @Environment(\.dismiss) private var dismiss
 
-    private let repositoryURL = URL(string: "https://github.com/raycalrui/CodexMeter")!
+    private let repositoryURL = URL(string: "https://github.com/boymaxpos/CodexMeter")!
 
     var body: some View {
         VStack(spacing: 0) {

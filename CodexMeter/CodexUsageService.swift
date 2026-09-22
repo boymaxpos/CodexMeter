@@ -28,6 +28,7 @@ final class CodexUsageService: ObservableObject {
     private let settings: AppSettings
     private let notificationManager: NotificationManager
     private let history: UsageHistoryModel
+    private let mqttPublisher: MQTTHomeAssistantPublisher
     private var process: Process?
     private var inputHandle: FileHandle?
     private var outputHandle: FileHandle?
@@ -54,10 +55,12 @@ final class CodexUsageService: ObservableObject {
     init(
         settings: AppSettings,
         history: UsageHistoryModel,
+        mqttPublisher: MQTTHomeAssistantPublisher,
         notificationManager: NotificationManager = NotificationManager()
     ) {
         self.settings = settings
         self.history = history
+        self.mqttPublisher = mqttPublisher
         self.notificationManager = notificationManager
 
         // Defer startup until StateObject construction has completed on the main run loop.
@@ -657,6 +660,7 @@ final class CodexUsageService: ObservableObject {
                 threshold: settings.notificationThreshold
             )
         }
+        mqttPublisher.publish(windows: parsed, updatedAt: updatedAt, isStale: false)
     }
 
     private func requestTokenUsageIfNeeded() {
@@ -887,6 +891,9 @@ final class CodexUsageService: ObservableObject {
         // Preserve the last successful snapshot and explicitly mark it as stale.
         isStale = !windows.isEmpty
         errorMessage = message
+        if let lastUpdated, !windows.isEmpty {
+            mqttPublisher.publish(windows: windows, updatedAt: lastUpdated, isStale: true)
+        }
     }
 
     private func locateCodexExecutable() -> URL? {

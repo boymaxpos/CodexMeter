@@ -63,6 +63,10 @@ visible at a glance.
   local runtime paths to the App Server child process.
 - Preserves the last successful result and marks it as stale when refresh fails.
 - Supports optional low-quota and over-pace notifications.
+- Optionally publishes retained quota state to an MQTT broker, including Home
+  Assistant MQTT Discovery entities compatible with CodexQuotaTray. The broker
+  can run in Docker on another device; TLS and username/password authentication
+  are supported.
 - Supports launch at login.
 - Includes English, Simplified Chinese, and Traditional Chinese.
 - Lets the app interface follow the system appearance or stay in Light or Dark
@@ -175,7 +179,7 @@ CodexMeter currently discovers `codex` in these locations:
 Clone the repository:
 
 ```bash
-git clone git@github.com:raycalrui/CodexMeter.git
+git clone git@github.com:boymaxpos/CodexMeter.git
 cd CodexMeter
 open CodexMeter.xcodeproj
 ```
@@ -270,12 +274,41 @@ DMG to the matching GitHub Release, commit and push the generated
 See [AGENTS.md](AGENTS.md) for the project architecture, product rules,
 verification checklist, and planned developer customization options.
 
+## MQTT and Home Assistant
+
+Open **Settings → MQTT**, enable publishing, and enter the host and port of the
+MQTT broker running in your Docker environment. The password is stored in the
+macOS Keychain; other MQTT preferences stay in the app's local settings.
+
+CodexMeter publishes retained state to `codex/quota/state`, availability to
+`codex/quota/availability`, and Home Assistant Discovery configuration below
+`homeassistant/sensor/codex_quota` by default. These values are configurable.
+The state payload retains the CodexQuotaTray-compatible `five_hour`, `weekly`,
+and `status` fields and adds a `windows` array containing every quota window
+returned by Codex. The default Discovery entities are:
+
+- `sensor.codex_5h_remaining_percent`
+- `sensor.codex_5h_used_percent`
+- `sensor.codex_5h_reset_time`
+- `sensor.codex_weekly_remaining_percent`
+- `sensor.codex_weekly_used_percent`
+- `sensor.codex_weekly_reset_time`
+- `sensor.codex_quota_status`
+
+Publishing uses MQTT 3.1.1 with QoS 0. Discovery, availability, and—by
+default—state messages are retained so Docker-side consumers can recover the
+latest quota immediately after reconnecting.
+
 ## Privacy and Security
 
 - CodexMeter communicates with a local Codex process over stdio.
 - It does not copy or persist Codex access tokens.
 - It does not read Codex authentication files directly.
 - It does not log account email addresses or raw authentication responses.
+- MQTT is disabled by default. When enabled, it transmits quota percentages,
+  reset times, window names, freshness state, and the configured device name to
+  the user-selected broker. It never sends account email or Codex credentials.
+  The MQTT password is stored in the macOS Keychain.
 - App Server errors use locally authored messages instead of displaying raw
   server errors or system exception details that could contain private data.
 - App Server output is read in bounded chunks. A response line over 1 MiB stops
@@ -298,8 +331,8 @@ Mac App Store distribution.
 
 ## Full history backup and restore
 
-The menu-bar **Settings** entry opens one resizable window with four categories:
-General, Menu Bar & Popover, History & Backup, and Developer, followed by About.
+The menu-bar **Settings** entry opens one resizable window with five categories:
+General, Menu Bar & Popover, MQTT, History & Backup, and Developer, followed by About.
 Existing preferences are preserved. About/update information opens in the same
 settings window; Usage History remains a separate window.
 
@@ -329,6 +362,8 @@ Backups larger than 512 MiB are currently unsupported.
 - Banked-reset availability is account-dependent. Older App Server versions or
   unsupported accounts may omit it; CodexMeter does not treat omission as a
   confirmed zero balance.
+- MQTT uses broker-authenticated TCP or TLS with the system trust store. Custom
+  certificate authorities and MQTT WebSockets are not currently supported.
 - Codex currently provides no stable identifier for API-key and Bedrock
   accounts. CodexMeter therefore cannot restore separate historical profiles
   when switching back and forth between multiple credentials of those types;

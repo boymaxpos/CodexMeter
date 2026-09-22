@@ -133,13 +133,14 @@ has changed.
   the Menu Bar & Popover settings category. Hidden sections must continue
   refreshing and recording history.
 - `AppSettingsView.swift` owns one resizable settings window with General,
-  Menu Bar & Popover, History & Backup, and Developer categories. The menu bar
+  Menu Bar & Popover, MQTT, History & Backup, and Developer categories. The menu bar
   Settings row opens this window directly; do not expand settings inline.
   About is the final sidebar category and embeds About/update content in the
   settings detail pane. History & Backup uses the same grouped Form as General.
   Usage History also retains its separate window.
 - `AppSettings.swift` persists in-app language, app appearance, menu bar,
-  popover content, notification, threshold, launch-at-login, and separately
+  popover content, notification, MQTT (except its Keychain password), threshold,
+  launch-at-login, and separately
   namespaced developer preferences. App appearance defaults to following the
   system and may be overridden to Light or Dark for all app content windows;
   synchronize both SwiftUI's preferred color scheme and each content host's
@@ -148,6 +149,13 @@ has changed.
   system menu bar appearance.
   `NotificationManager.swift` owns local notification state and checks the
   existing system authorization before requesting it.
+- `MQTTHomeAssistantPublisher.swift` maps each successful or stale quota
+  snapshot to the CodexQuotaTray-compatible MQTT state schema and publishes it
+  with retained availability and Home Assistant Discovery messages. It uses a
+  bounded MQTT 3.1.1 TCP/TLS connection through Network.framework, keeps MQTT
+  disabled by default, and never publishes account identity or authentication
+  data. `MQTTModels.swift` owns the testable payload/configuration mapping;
+  `MQTTPasswordStore.swift` keeps only the broker password in Keychain.
 - `Localizable.xcstrings` is the source of English, Simplified Chinese, and
   Traditional Chinese user-facing strings.
 - Use `account/read` for account metadata and `account/rateLimits/read` for quota
@@ -313,6 +321,10 @@ Codex App Server.
 - Use returned window durations and reset timestamps instead of hard-coding the
   account's quota structure.
 - Never log account email addresses, tokens, or raw authentication responses.
+- MQTT publishing is opt-in. Publish only quota percentages, reset times,
+  returned window names, freshness state, and user-configured device metadata.
+  Store the broker password in Keychain and keep Codex credentials and account
+  identity out of every MQTT payload.
 
 ## Refresh and freshness rules
 
@@ -484,6 +496,13 @@ Codex App Server.
   pace".
 
 ### Candidate follow-ups
+
+- [x] Add optional **MQTT and Home Assistant Discovery** publishing for a
+  broker running in Docker on another device. Preserve the reference
+  CodexQuotaTray `five_hour`, `weekly`, and status schema, add all returned quota
+  windows as an extensible array, retain discovery/availability/state by
+  default, support TCP/TLS plus username/password authentication, store the
+  password in Keychain, and keep publishing disabled until configured.
 
 - [x] Re-investigate the **quota progress-bar tint regression after a live
   Light/Dark appearance switch**. While CodexMeter remains running, switching

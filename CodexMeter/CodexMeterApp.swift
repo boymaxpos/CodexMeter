@@ -11,6 +11,7 @@ enum CodexMeterWindowID {
 struct CodexMeterApp: App {
     @StateObject private var settings: AppSettings
     @StateObject private var history: UsageHistoryModel
+    @StateObject private var mqttPublisher: MQTTHomeAssistantPublisher
     @StateObject private var usageService: CodexUsageService
     @StateObject private var updateChecker: UpdateChecker
 
@@ -24,13 +25,19 @@ struct CodexMeterApp: App {
         // such as notification thresholds take effect immediately.
         let settings = AppSettings()
         let history = UsageHistoryModel()
+        let mqttPublisher = MQTTHomeAssistantPublisher(settings: settings)
         let updateChecker = UpdateChecker(
             includePrereleases: settings.includePrereleaseUpdates
         )
         _settings = StateObject(wrappedValue: settings)
         _history = StateObject(wrappedValue: history)
+        _mqttPublisher = StateObject(wrappedValue: mqttPublisher)
         _usageService = StateObject(
-            wrappedValue: CodexUsageService(settings: settings, history: history)
+            wrappedValue: CodexUsageService(
+                settings: settings,
+                history: history,
+                mqttPublisher: mqttPublisher
+            )
         )
         _updateChecker = StateObject(wrappedValue: updateChecker)
     }
@@ -62,7 +69,8 @@ struct CodexMeterApp: App {
 
         Window("CodexMeter", id: CodexMeterWindowID.settings) {
             AppSettingsView(service: usageService, settings: settings,
-                            history: history, updateChecker: updateChecker)
+                            history: history, updateChecker: updateChecker,
+                            mqttPublisher: mqttPublisher)
                 .appAppearance(settings.appearanceMode)
         }
         .defaultSize(width: 840, height: 700)

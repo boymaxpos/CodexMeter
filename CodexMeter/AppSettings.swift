@@ -193,6 +193,22 @@ final class AppSettings: ObservableObject {
         didSet { defaults.set(includePrereleaseUpdates, forKey: Keys.includePrereleaseUpdates) }
     }
 
+    @Published var mqttConfiguration: MQTTConfiguration {
+        didSet {
+            if let data = try? JSONEncoder().encode(mqttConfiguration) {
+                defaults.set(data, forKey: Keys.mqttConfiguration)
+            }
+        }
+    }
+
+    @Published var mqttPassword: String {
+        didSet {
+            if !MQTTPasswordStore.save(mqttPassword) {
+                showSettingsError(L10n.string("mqtt.password_save_failed"))
+            }
+        }
+    }
+
     @Published var developerAppearance: MenuBarAppearance {
         didSet {
             let normalized = developerAppearance.normalized()
@@ -249,6 +265,7 @@ final class AppSettings: ObservableObject {
         static let notificationThreshold = "notificationThreshold"
         static let historyRetention = "history.retention"
         static let includePrereleaseUpdates = "updates.includePrereleases"
+        static let mqttConfiguration = "mqtt.configuration"
         static let developerAppearance = "developer.appearance"
         static let developerAppearanceDefaultsVersion = "developer.appearanceDefaultsVersion"
         static let developerPreviewEnabled = "developer.previewEnabled"
@@ -293,6 +310,13 @@ final class AppSettings: ObservableObject {
             rawValue: defaults.string(forKey: Keys.historyRetention) ?? ""
         ) ?? .forever
         includePrereleaseUpdates = defaults.bool(forKey: Keys.includePrereleaseUpdates)
+        if let data = defaults.data(forKey: Keys.mqttConfiguration),
+           let decoded = try? JSONDecoder().decode(MQTTConfiguration.self, from: data) {
+            mqttConfiguration = decoded.normalized
+        } else {
+            mqttConfiguration = MQTTConfiguration()
+        }
+        mqttPassword = MQTTPasswordStore.load()
         let appearanceDefaultsVersion = defaults.integer(
             forKey: Keys.developerAppearanceDefaultsVersion
         )
